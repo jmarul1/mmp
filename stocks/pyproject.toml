@@ -1,0 +1,32 @@
+[project]
+name = "stk-pred"
+dynamic = ["version"]
+description = "Stock research and prediction"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Mauricio Marulanda", email = "jmarul1@gmail.com" }
+]
+dependencies = [
+    "finnhub-python>=2.4.24",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "robin-stocks>=3.4.0",
+    "yfinance>=0.2.65",
+]
+
+[project.scripts]
+stk-pred="stk_pred.main:main"
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "pytest>=8.4.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/stk_pred/version.py"

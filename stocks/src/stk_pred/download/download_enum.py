@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import StrEnum, auto
 
 
 class RobinhoodEnum(StrEnum):
@@ -17,6 +17,20 @@ class FinhubEnum(StrEnum):
     SELL = "sell"
     STRONG_SELL = "strongSell"
     PUBLISHED = "period"
+
+
+class OptionsEnum(StrEnum):
+    EXPIRATION = "expiration"
+    STRIKE = "strike"
+    BID = "bid"
+    ASK = "ask"
+    LAST = "last"
+
+
+class StockInfoEnum(StrEnum):
+    PE_RATIO = "trailingPegRatio"
+    REVENUE_GROWTH = "revenueGrowth"
+    MARKET_CAP = "marketCap"
 
 
 class TimeZone(StrEnum):
