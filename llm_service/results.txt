@@ -1,0 +1,81 @@
+(llm-service) jmarul1@MM-MacMini llm_service % python tests/quick.py
+
+--- Testing Model: qwen3.5:35b-a3b-coding-nvfp4 ---
+OUTPUT:
+I am **Qwen3.5**, the latest large language model from Alibaba. Here are my core capabilities:
+
+### 🌍 **Language & Understanding**
+- **Multilingual Support**: Fluent in **100+ languages**, including Chinese, English, German, French, Spanish, and many others.
+- **Precision Handling**: Enhanced comprehension for complex documents, technical texts, and nuanced instructions.
+
+### 🧠 **Reasoning & Problem-Solving**
+- **Advanced Logic**: Strong performance in math, science, and logical reasoning tasks (e.g., solving equations, analyzing scientific concepts).
+- **Code Mastery**: Generate, debug, and optimize code across **multiple programming languages** (Python, JavaScript, SQL, etc.).
+- **Visual Analysis**: Interpret charts, diagrams, and formulas; extract text via **OCR**; analyze causal relationships in images.
+
+### 📄 **Long-Context Processing**
+- **256K Token Window**: Handle extremely long documents (e.g., research papers, legal contracts, video transcripts) with precise information retrieval.
+
+### 🤖 **Autonomous Agents**
+- **Tool Integration**: Plan and execute multi-step tasks (e.g., data analysis, API calls, web searches).
+- **Code Execution**: Run and debug code autonomously for tasks like data visualization or automation.
+
+### 🎯 **Human-Aligned Interaction**
+- **Role-Playing**: Adapt to specific personas (e.g., customer support, tutor, creative writer).
+- **Instruction Following**: Deliver accurate, context-aware responses with minimal ambiguity.
+
+### ⚡ **Efficiency & Specialization**
+- **Optimized Performance**: Faster inference and reduced resource usage for cost-effective deployment.
+- **Domain Expertise**: Support for healthcare, law, and other specialized fields with high accuracy.
+
+### ⚠️ **Limitations**
+- **No Real-Time Data**: Knowledge cutoff is **2026**; cannot access live information or external databases.
+- **No Image Generation**: Focus on text, code, and visual *analysis* (not creation).
+
+Need help with a specific task? Just ask! 😊
+
+--------------------------------------------------
+📦 Load Time:   2.43s
+⚡ Prompt Eval: 14 tokens in 0.53s
+✍️  Generation:  995 tokens in 14.54s
+🚀 SPEED:       68.42 tokens/sec
+(llm-service) jmarul1@MM-MacMini llm_service % python tests/quick.py
+
+--- Testing Model: llama3.2-vision:11b ---
+OUTPUT:
+I can be used in a variety of ways, such as:
+- Answering questions
+- Providing definitions for words and phrases
+- Translation
+- Generating text and summaries
+- Offering suggestions for texts and responses
+- And more ...
+
+--------------------------------------------------
+📦 Load Time:   1.64s
+⚡ Prompt Eval: 13 tokens in 0.13s
+✍️  Generation:  48 tokens in 1.06s
+🚀 SPEED:       45.09 tokens/sec
+(llm-service) jmarul1@MM-MacMini llm_service % python tests/quick.py
+
+--- Testing Model: llama3.3:70b ---
+OUTPUT:
+I can be used in a variety of ways, from helping you plan a vacation to creating art. I'm here to assist you in finding the help or information you need. My strengths include answering questions, generating text and images and even just chatting with you.
+
+--------------------------------------------------
+📦 Load Time:   19.18s
+⚡ Prompt Eval: 14 tokens in 2.26s
+✍️  Generation:  53 tokens in 32.37s
+🚀 SPEED:       1.64 tokens/sec
+(llm-service) jmarul1@MM-MacMini llm_service % python tests/quick.py
+
+--- Testing Model: llama3.2:3b ---
+OUTPUT:
+I can be used in a variety of ways, from helping you plan a vacation to creating art. I'm here to assist you in finding the help or information you need. My strengths include answering questions, generating text and images and even just chatting with you.
+
+--------------------------------------------------
+📦 Load Time:   1.80s
+⚡ Prompt Eval: 29 tokens in 0.07s
+✍️  Generation:  53 tokens in 0.60s
+🚀 SPEED:       88.40 tokens/sec
+(llm-service) jmarul1@MM-MacMini llm_service % 

@@ -1,0 +1,25 @@
+[project]
+name = "llm-service"
+version = "1.0.0"
+description = "LLM hosting"
+readme = "README.md"
+authors = [{name="Mauricio Marulanda",email="jmarul1@gmail.com.com"}]
+keywords = ["host","llm"]
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.3.3",
+    "rich-click>=1.9.7",
+]
+
+[project.scripts]
+start-llm = "llm_service.cli:run_llm_service"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+testing = [
+    "openai>=2.36.0",
+    "requests>=2.33.1",
+]
