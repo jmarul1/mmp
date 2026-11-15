@@ -5,7 +5,7 @@ description = "LLM hosting"
 readme = "README.md"
 authors = [{name="Mauricio Marulanda",email="jmarul1@gmail.com.com"}]
 keywords = ["host","llm"]
-requires-python = ">=3.13"
+requires-python = ">=3.15"
 dependencies = [
     "click>=8.3.3",
     "rich-click>=1.9.7",

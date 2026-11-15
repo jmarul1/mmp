@@ -34,3 +34,6 @@ archive
 # macOS generated files
 .DS_Store
 
+# Collected data (keep the folder, not its contents)
+data/*
+!data/.gitkeep

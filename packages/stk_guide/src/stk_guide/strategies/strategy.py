@@ -1,6 +1,7 @@
 from abc import abstractmethod
+
+from foundation.entities.stocks import Stocks
 from pandas import DataFrame
-from ..entities.stocks import Stocks
 
 
 class Strategy:

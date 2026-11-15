@@ -6,7 +6,7 @@ from rich import print as rprint
 def run_llm_service():
     """Launch LLM Hosting"""
     from os import environ
-    from subprocess import Popen, DEVNULL, run
+    from subprocess import DEVNULL, Popen, run
     from time import sleep
 
     quantization = "8_0"
@@ -30,19 +30,19 @@ def run_llm_service():
         rprint("\n🛑 Shutdown signal received...")
     finally:
         server_process.terminate()
-        run(["killall", "ollama"], stderr=DEVNULL)
+        run(["killall", "ollama"], stderr=DEVNULL, check=False)
         rprint("✨ RAM cleared. Server closed.")
 
 
-def is_service_ready() -> None:
-    from http.client import HTTPConnection
+def is_service_ready() -> bool:
+    from http.client import HTTPConnection, HTTPException
 
     try:
         conn = HTTPConnection("localhost", 11434, timeout=1)
         conn.request("GET", "/")
         response = conn.getresponse()
         return response.status == 200
-    except:
+    except OSError, HTTPException:
         return False
 
 

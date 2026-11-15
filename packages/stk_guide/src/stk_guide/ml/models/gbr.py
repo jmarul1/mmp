@@ -1,10 +1,9 @@
 from attrs import define, field
+from foundation.datatypes import DataType
 from pandas import DataFrame, Series
 from sklearn.ensemble import GradientBoostingRegressor
+
 from .model import Model
-from ..encoding.encoder import Encoder
-from ..encoding.algorithms import MinMaxCoder
-from ..utils.data_utils import DataType
 
 
 @define

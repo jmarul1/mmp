@@ -1,18 +1,17 @@
 from abc import abstractmethod
-from typing import ParamSpec
-from attrs import define
-from ..decorators import PrePostExecution
-from ...entities.stocks import Stocks
+from typing import Any
 
-StageInputs = ParamSpec("StageInputs")
+from foundation.entities.stocks import Stocks
+
+from ..decorators import PrePostExecution
 
 
 class Stage:
     @abstractmethod
     @PrePostExecution.stage
-    def __call__(self, context: Stocks, **kwargs: StageInputs.kwargs) -> None:
+    def __call__(self, context: Stocks, **kwargs: Any) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _init(self, **kwargs: StageInputs.kwargs) -> None:
+    def _init(self, **kwargs: Any) -> None:
         raise NotImplementedError

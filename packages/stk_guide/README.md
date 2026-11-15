@@ -1,2 +1,5 @@
-# market
-1. Get recommendations for a given stock based on the research
+# stk_guide
+
+Stock recommendations from research data: a pipeline (collect, preprocess, train, predict), strategies and scorers built on `foundation`. Models are sklearn only.
+
+The `stock` CLI is declared but not working yet.

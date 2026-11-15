@@ -1,7 +1,8 @@
 from attrs import define, field
-from ..pipeline.stages.preprocessing import Preprocessor
+
 from ..pipeline.stages.collecting import Collector
 from ..pipeline.stages.predicting import Predictor
+from ..pipeline.stages.preprocessing import Preprocessor
 from ..pipeline.stages.training import Trainer
 
 

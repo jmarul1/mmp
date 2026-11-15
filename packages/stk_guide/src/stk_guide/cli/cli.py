@@ -1,9 +1,8 @@
-import importlib.metadata
-from logging import DEBUG, INFO
 import click
-from ..entities.stocks import Stocks
-from ..strategies.historic_price import Sequence
+from foundation.entities.stocks import Stocks
+
 from ..logger import Logger
+from ..strategies.historic_price import Sequence
 
 
 # @click.group()

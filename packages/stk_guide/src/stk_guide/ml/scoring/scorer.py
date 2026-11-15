@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+
 from attrs import define, field
+from foundation.encoding.algorithms import MinMaxCoder
+from foundation.encoding.encoder import Encoder
+from foundation.entities.rating import RatingEnum
 from pandas import DataFrame, Series
-from ..encoding.encoder import Encoder
-from ..encoding.algorithms import MinMaxCoder
-from ...entities.rating import RatingEnum
 
 
 class Scorer(ABC):
@@ -22,6 +23,10 @@ class RatingsScorer(Scorer):
         buy = 1 - df[RatingEnum.BUY]
         hold = df[RatingEnum.HOLD] * self.hold_weight
         scores = buy + hold + df[RatingEnum.SELL]
-        nscores = Encoder(feature_scalers=MinMaxCoder()).fit_transform(scores.to_frame()).iloc[:, 0]
+        nscores = (
+            Encoder(feature_scalers=MinMaxCoder())
+            .fit_transform(scores.to_frame())
+            .iloc[:, 0]
+        )
         nscores.name = "scores"
         return nscores

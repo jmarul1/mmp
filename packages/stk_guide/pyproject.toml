@@ -11,23 +11,21 @@ readme = "README.md"
 keywords = ["stocks","predictions"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.15"
 ]
 dependencies = [
     "attrs",
+    "foundation",
     "click",
     "daiquiri",
-    "keras",
     "numpy",
     "pandas",
     "progress",
     "scikit-learn",
     "terminaltables",
-    "tensorflow",
-    "torch",
     "yfinance",
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 
 [project.urls]
 Repository = "https://github.com/jmarul1/ReinforcementLearning.git"
@@ -41,3 +39,6 @@ dev = [
     "pytest",
     "pytest-xdist",
 ]
+
+[tool.uv.sources]
+foundation = { workspace = true }

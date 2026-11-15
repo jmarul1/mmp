@@ -1,7 +1,7 @@
 from copy import deepcopy
 from enum import Enum
 from inspect import signature
-from typing import Any, Self
+from typing import Any
 
 
 class ResetDefaults(Enum):
@@ -9,7 +9,7 @@ class ResetDefaults(Enum):
 
 
 class ResetClone:
-    def clone_reset(self, inst: Any, dont_resets: list[str] = None) -> Self:
+    def clone_reset[T](self, inst: T, dont_resets: list[str] | None = None) -> T:
         args, kwargs = [], {}
         sig = signature(inst.__class__)
         for arg_name, arg_value in sig.parameters.items():
@@ -38,13 +38,25 @@ class ResetClone:
     def clone_reset_dict(self, dt: dict[Any, Any]) -> dict[Any, Any]:
         new = {}
         for current_key, current_value in dt.items():
-            reset_key = current_key.clone_reset() if hasattr(current_key, ResetDefaults.CLONE_RESET_FN.value) else deepcopy(current_key)
-            reset_value = current_value.clone_reset() if hasattr(current_value, ResetDefaults.CLONE_RESET_FN.value) else deepcopy(current_value)
+            reset_key = (
+                current_key.clone_reset()
+                if hasattr(current_key, ResetDefaults.CLONE_RESET_FN.value)
+                else deepcopy(current_key)
+            )
+            reset_value = (
+                current_value.clone_reset()
+                if hasattr(current_value, ResetDefaults.CLONE_RESET_FN.value)
+                else deepcopy(current_value)
+            )
             new[reset_key] = reset_value
         return new
 
     def clone_reset_list(self, lst: list[Any]) -> list[Any]:
         return [
-            (current_value.clone_reset() if hasattr(current_value, ResetDefaults.CLONE_RESET_FN.value) else deepcopy(current_value))
+            (
+                current_value.clone_reset()
+                if hasattr(current_value, ResetDefaults.CLONE_RESET_FN.value)
+                else deepcopy(current_value)
+            )
             for current_value in lst
         ]

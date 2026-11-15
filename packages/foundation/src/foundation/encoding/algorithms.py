@@ -1,10 +1,11 @@
 from typing import Any, Self
+
 from attrs import define, field
 from numpy import array
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
-from ..utils.reset_utils import ResetClone
-from ..utils.data_utils import NativeDataType
 
+from ..cloning import ResetClone
+from ..datatypes import ColumnData
 
 EncoderApi = MinMaxScaler | OneHotEncoder | OrdinalEncoder
 
@@ -14,17 +15,17 @@ class CoderType:
     options: dict[str, Any] = field(factory=dict)
     api: EncoderApi = field(init=False)
 
-    def fit(self, data: list[NativeDataType]) -> Self:
+    def fit(self, data: ColumnData) -> Self:
         _data = array(data).reshape(-1, 1)
         self.api.fit(_data)
         return self
 
-    def code(self, data: list[NativeDataType]) -> list[float] | list[list[float]]:
+    def code(self, data: ColumnData) -> ColumnData:
         _data = array(data).reshape(-1, 1)
         edata = self.api.transform(_data)
         return edata.squeeze().tolist()
 
-    def fit_code(self, data: list[NativeDataType]) -> list[float] | list[list[float]]:
+    def fit_code(self, data: ColumnData) -> ColumnData:
         self.fit(data)
         return self.code(data)
 
@@ -46,19 +47,19 @@ class MinMaxCoder(CoderType):
 
 @define
 class IdentityCoder(CoderType):
-    def fit(self, data: list[NativeDataType]) -> Self:
+    def fit(self, data: ColumnData) -> Self:
         return self
 
-    def code(self, data: list[float]) -> list[float]:
+    def code(self, data: ColumnData) -> ColumnData:
         return data
 
 
 @define
 class DatetimeCoder(CoderType):
-    def fit(self, data: list[NativeDataType]) -> Self:
+    def fit(self, data: ColumnData) -> Self:
         return self
 
-    def code(self, data: list) -> list:
+    def code(self, data: ColumnData) -> ColumnData:
         return [idata.timestamp() for idata in data]
 
 
@@ -67,7 +68,7 @@ class OneHotCoder(CoderType):
     def __attrs_post_init__(self) -> None:
         self.api = OneHotEncoder(**self.options)
 
-    def code(self, data: list[NativeDataType]) -> list[list[float]]:
+    def code(self, data: ColumnData) -> ColumnData:
         _data = array(data).reshape(-1, 1)
         edata = self.api.transform(_data)
         return edata.toarray().tolist()
