@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from datetime import UTC, date, datetime
 from os import environ
 from pathlib import Path
-from typing import Any, Self, cast
+from typing import Any, ClassVar, Self, cast
 
 from pandas import DataFrame, Timestamp, notna, read_sql_query, to_datetime
 from sqlalchemy import Engine, Table, create_engine, event, select
@@ -12,75 +12,51 @@ from sqlalchemy.orm import DeclarativeBase, Session
 from ..entities.options import Options
 from ..entities.prices import Prices
 from ..entities.rating import Rating
-from .migrate import migrate
+from .migrate import Migrator
 from .models import OptionRow, PriceRow, RatingRow
-
-OPTION_COLUMNS = {
-    "contractSymbol": "contract_symbol",
-    "expiration": "expiration",
-    "strike": "strike",
-    "lastTradeDate": "last_trade_date",
-    "lastPrice": "last_price",
-    "bid": "bid",
-    "ask": "ask",
-    "change": "change",
-    "percentChange": "percent_change",
-    "volume": "volume",
-    "openInterest": "open_interest",
-    "impliedVolatility": "implied_volatility",
-    "inTheMoney": "in_the_money",
-}
-PRICE_COLUMNS = {
-    "Open": "open",
-    "High": "high",
-    "Low": "low",
-    "Close": "close",
-    "Volume": "volume",
-    "Dividends": "dividends",
-    "Stock Splits": "stock_splits",
-}
-
-
-def default_db_path() -> Path:
-    """Return $MMP_DB if set, else data/mmp.db in the workspace root (found by its pyproject.toml)."""
-    if "MMP_DB" in environ:
-        return Path(environ["MMP_DB"])
-    for folder in (Path.cwd(), *Path.cwd().parents):
-        if (folder / "pyproject.toml").is_file() and (folder / "data").is_dir():
-            return folder / "data" / "mmp.db"
-    return Path.cwd() / "data" / "mmp.db"
-
-
-def _clean(value: Any) -> Any:
-    """Convert a value for SQLite: NaN to None, datetimes to naive UTC, numpy scalars to Python."""
-    if value is None or not notna(value):
-        return None
-    if isinstance(value, Timestamp):
-        value = value.to_pydatetime()
-    if isinstance(value, datetime):
-        if value.tzinfo is not None:
-            value = value.astimezone(UTC).replace(tzinfo=None)
-        return value
-    if hasattr(value, "item"):
-        return value.item()
-    return value
-
-
-def _as_date(value: Any) -> date:
-    value = _clean(value)
-    return value.date() if isinstance(value, datetime) else value
 
 
 class Store:
+    ENV_VAR: ClassVar[str] = "MMP_DB"
+    DATA_DIR: ClassVar[str] = "data"
+    FILENAME: ClassVar[str] = "mmp.db"
+
     def __init__(
         self, path: str | Path | None = None, *, migrate_db: bool = True
     ) -> None:
-        self.path = Path(path) if path is not None else default_db_path()
+        self.path = Path(path) if path is not None else self.default_path()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.engine: Engine = create_engine(f"sqlite:///{self.path}")
         event.listen(self.engine, "connect", self._on_connect)
         if migrate_db:
-            migrate(self.engine.url.render_as_string(hide_password=False))
+            Migrator.upgrade(self.engine.url.render_as_string(hide_password=False))
+
+    @classmethod
+    def default_path(cls) -> Path:
+        """Return the database path from the environment variable when set, otherwise the data folder of the nearest parent workspace that has a pyproject.toml and a data directory, falling back to the current directory."""
+        if cls.ENV_VAR in environ:
+            return Path(environ[cls.ENV_VAR])
+        for folder in (Path.cwd(), *Path.cwd().parents):
+            if (folder / "pyproject.toml").is_file() and (
+                folder / cls.DATA_DIR
+            ).is_dir():
+                return folder / cls.DATA_DIR / cls.FILENAME
+        return Path.cwd() / cls.DATA_DIR / cls.FILENAME
+
+    @staticmethod
+    def clean(value: Any) -> Any:
+        """Convert a value for SQLite storage: NaN and NaT become None, timezone-aware datetimes become naive UTC, and numpy scalars become plain Python values, so SQLAlchemy can bind them directly."""
+        if value is None or not notna(value):
+            return None
+        if isinstance(value, Timestamp):
+            value = value.to_pydatetime()
+        if isinstance(value, datetime):
+            if value.tzinfo is not None:
+                value = value.astimezone(UTC).replace(tzinfo=None)
+            return value
+        if hasattr(value, "item"):
+            return value.item()
+        return value
 
     @staticmethod
     def _on_connect(dbapi_conn: Any, _record: Any) -> None:
@@ -122,10 +98,9 @@ class Store:
         rows = [
             {
                 "symbol": symbol,
-                "ts": _clean(ts),
-                **{col: _clean(entry.get(key)) for key, col in PRICE_COLUMNS.items()},
+                **{k: self.clean(v) for k, v in bar.model_dump().items()},
             }
-            for ts, entry in prices.items()
+            for bar in prices.bars
         ]
         return self._upsert(PriceRow, rows)
 
@@ -138,24 +113,15 @@ class Store:
     def save_options(
         self, symbol: str, options: Options, snapshot: date | None = None
     ) -> int:
-        snapshot = snapshot or date.today()
-        saved = 0
-        for side, chain in (("call", options.calls), ("put", options.puts)):
-            if chain is None or chain.empty:
-                continue
-            chain = chain.reindex(columns=list(OPTION_COLUMNS))
-            rows = []
-            for values in chain.itertuples(index=False, name=None):
-                row = {
-                    col: _clean(value)
-                    for col, value in zip(OPTION_COLUMNS.values(), values, strict=True)
-                }
-                row["expiration"] = _as_date(row["expiration"])
-                rows.append(
-                    {"snapshot_date": snapshot, "symbol": symbol, "side": side, **row}
-                )
-            saved += self._upsert(OptionRow, rows)
-        return saved
+        rows = [
+            {
+                "snapshot_date": snapshot or date.today(),
+                "symbol": symbol,
+                **{k: self.clean(v) for k, v in contract.model_dump().items()},
+            }
+            for contract in options.contracts
+        ]
+        return self._upsert(OptionRow, rows)
 
     def load_options(
         self, symbol: str, snapshot: date | None = None, side: str | None = None
@@ -183,7 +149,7 @@ class Store:
                 "snapshot_date": snapshot,
                 "symbol": symbol,
                 "source": source,
-                "published": _as_date(rating.date),
+                "published": rating.date,
                 "buy": rating.buy,
                 "hold": rating.hold,
                 "sell": rating.sell,

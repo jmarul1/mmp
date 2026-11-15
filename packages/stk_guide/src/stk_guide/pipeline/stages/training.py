@@ -23,7 +23,7 @@ class ClosePriceTrainer(Trainer):
     def __call__(self, context: Context) -> None:
         prices = context.stock.prices
         self.model.preprocessor = context.preprocessor
-        self.model.train(prices.features(), prices.to_frame().Close)
+        self.model.train(prices.features(), prices.to_frame().close)
         context.model = self.model
 
 

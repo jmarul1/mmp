@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 from foundation.encoding.algorithms import MinMaxCoder
 from foundation.encoding.encoder import Encoder
@@ -13,7 +14,9 @@ class Scorer(ABC):
 
 
 class RatingsScorer(Scorer):
-    def __init__(self, hold_weight: float = 0.5) -> None:
+    HOLD_WEIGHT: ClassVar[float] = 0.5
+
+    def __init__(self, hold_weight: float = HOLD_WEIGHT) -> None:
         self.hold_weight = hold_weight
 
     def __call__(self, data: DataFrame) -> Series:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
-from .prices import Prices
-from .stock import Stock
+from foundation.entities.prices import Prices
+from foundation.market.stock import Stock
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any
 
-from foundation.entities.stocks import Stocks
+from foundation.market.stocks import Stocks
 
 from ..decorators import PrePostExecution
 

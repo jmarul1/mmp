@@ -1,6 +1,7 @@
 from typing import Any
 
 from click import MissingParameter
+from foundation.download.downloader import PriceHistory
 
 from ..context import Context
 from ..decorators import PrePostExecution
@@ -24,5 +25,5 @@ class PriceCollector(Collector):
     def _init(self, **kwargs: Any) -> None:
         if "days_back" not in kwargs:
             raise MissingParameter("days_back")
-        self._interval = kwargs.get("interval", "1d")
+        self._interval = kwargs.get("interval", PriceHistory.INTERVAL)
         self._days_back = kwargs["days_back"]

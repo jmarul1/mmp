@@ -2,15 +2,16 @@ from datetime import datetime, timedelta
 
 from dateutil.tz import gettz
 from foundation.download.download_enum import TimeZone
+from foundation.download.downloader import PriceHistory
 from foundation.encoding.algorithms import MinMaxCoder
 from foundation.encoding.encoder import Encoder
-from foundation.entities.prediction import Prediction
 from foundation.entities.prices import PricesEnum
-from foundation.entities.stock import Stock
+from foundation.market.stock import Stock
 from pandas import DataFrame, concat
 
 from ..pipeline.pipeline import Pipeline
 from ..pipeline.pipeline_stages import PipelineStages
+from ..pipeline.prediction import Prediction
 from ..pipeline.stages.collecting import PriceCollector
 from .strategy import Strategy
 
@@ -22,7 +23,11 @@ class HistoricPrice(Strategy):
         self.pipeline_stages = pipeline_stages
 
     def __call__(
-        self, stock: Stock, days_back: int, days_fwd: int, interval: str = "1d"
+        self,
+        stock: Stock,
+        days_back: int,
+        days_fwd: int,
+        interval: str = PriceHistory.INTERVAL,
     ) -> Prediction:
         stock.populate_prices(days_back=days_back, interval=interval)
         history = stock.prices.features()

@@ -4,7 +4,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import TYPE_CHECKING, Any
 
-from foundation.entities.stocks import Stocks
+from foundation.market.stocks import Stocks
 
 if TYPE_CHECKING:
     from .stages.stage import Stage

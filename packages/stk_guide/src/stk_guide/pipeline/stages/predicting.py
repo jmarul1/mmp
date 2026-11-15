@@ -1,11 +1,12 @@
 from typing import Any
 
 from click import MissingParameter
-from foundation.entities.prediction import Prediction
+from foundation.entities.prices import PriceBar
 from pandas import DataFrame
 
 from ..context import Context
 from ..decorators import PrePostExecution
+from ..prediction import Prediction
 from .stage import Stage
 
 
@@ -30,5 +31,5 @@ class PricePredictor(Predictor):
         for future_date, price_pred in zip(
             self._future_space.iloc[:, 0], price_preds, strict=False
         ):
-            prediction.prices[future_date] = {"Close": price_pred}
+            prediction.prices.bars.append(PriceBar(ts=future_date, close=price_pred))
         context.prediction = prediction

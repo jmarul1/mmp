@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 from foundation.encoding.encoder import Encoder
-from foundation.entities.prediction import Prediction
-from foundation.entities.stock import Stock
+from foundation.market.stock import Stock
 
 from ..ml.models.model import Model
+from .prediction import Prediction
 
 
 @dataclass
