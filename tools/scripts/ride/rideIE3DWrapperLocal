@@ -1,3 +1,0 @@
-#!/bin/sh
-start_app ie3dLocalDistSim.sh $1
-exit 0

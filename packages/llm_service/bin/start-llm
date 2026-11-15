@@ -1,0 +1,6 @@
+#!/bin/zsh
+# Launch the llm_service CLI (start-llm) from anywhere.
+#   bin/start-llm [--help]
+# Syncs only the llm-service package, not the rest of the workspace.
+set -euo pipefail
+exec uv run --project "${0:A:h:h}" --package llm-service start-llm "$@"
