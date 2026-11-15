@@ -1,11 +1,11 @@
-from attrs import define, field
+from dataclasses import dataclass, field
 
 from .prices import Prices
 from .stock import Stock
 
 
-@define
+@dataclass
 class Prediction:
-    stock: Stock = field(default=None)
-    recommendation: str = field(default=None)
-    prices: Prices = field(factory=Prices)
+    stock: Stock | None = None
+    recommendation: str | None = None
+    prices: Prices = field(default_factory=Prices)

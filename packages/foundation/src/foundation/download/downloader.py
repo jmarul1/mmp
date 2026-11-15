@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from os import environ
 from typing import Any
 
-from attrs import define, field
 from dateutil.tz import gettz
 from finnhub import Client
 from pandas import concat
@@ -15,10 +15,14 @@ from ..entities.prices import Prices
 from ..entities.rating import Rating
 from .download_enum import FinhubEnum, RobinhoodEnum, TimeZone
 
-OutputType = dict[datetime, dict[str, float]] | dict[str, Any]
+
+def _parse_date(value: str | None) -> date:
+    if value is None:
+        return date.today()
+    return datetime.strptime(value.split("T")[0], "%Y-%m-%d").date()
 
 
-@define
+@dataclass
 class Downloader[T](ABC):
     symbol: str
 
@@ -27,16 +31,16 @@ class Downloader[T](ABC):
         raise NotImplementedError
 
 
-@define
+@dataclass
 class StockInfo(Downloader[dict[str, Any]]):
     def download(self) -> dict[str, Any]:
         return Ticker(self.symbol).info
 
 
-@define
+@dataclass
 class PriceHistory(Downloader[Prices]):
     days_back: int | float
-    interval: str = field(default="1d")
+    interval: str = "1d"
 
     def download(self) -> Prices:
         tz = gettz(TimeZone.DEFAULT.value)
@@ -46,11 +50,11 @@ class PriceHistory(Downloader[Prices]):
         return Prices(df.to_dict("index"))
 
 
-@define
+@dataclass
 class StockOptions(Downloader[Options]):
-    max_number: int | None = field(default=None)
+    max_number: int | None = None
 
-    def __atrs_post_init__(self) -> None:
+    def __post_init__(self) -> None:
         if self.max_number is None:
             self.max_number = -1
 
@@ -69,37 +73,27 @@ class StockOptions(Downloader[Options]):
         return Options(concat(calls), concat(puts))
 
 
-@define
+@dataclass
 class RobinhoodRatings(Downloader[list[Rating]]):
     def download(self) -> list[Rating]:
         dt = get_ratings(self.symbol)
         return [self.robinhood_transform(dt)]
 
     def robinhood_transform(self, entry: dict) -> Rating:
-        date_str = entry[RobinhoodEnum.PUBLISHED]
-        _date = (
-            datetime.strptime(date_str.split("T")[0], "%Y-%m-%d").date()
-            if date_str is not None
-            else date.today()
+        summary = entry[RobinhoodEnum.SUMMARY]
+        return Rating(
+            date=_parse_date(entry[RobinhoodEnum.PUBLISHED]),
+            buy=summary[RobinhoodEnum.BUY],
+            hold=summary[RobinhoodEnum.HOLD],
+            sell=summary[RobinhoodEnum.SELL],
         )
-        for name, value in entry[RobinhoodEnum.SUMMARY].items():
-            match name:
-                case RobinhoodEnum.BUY:
-                    buy = value
-                case RobinhoodEnum.SELL:
-                    sell = value
-                case RobinhoodEnum.HOLD:
-                    hold = value
-                case _:
-                    pass
-        return Rating(_date, buy, hold, sell)
 
 
-@define
+@dataclass
 class FinhubRating(Downloader[list[Rating]]):
     _client: Client = field(init=False)
 
-    def __attrs_post_init__(self) -> None:
+    def __post_init__(self) -> None:
         self._client = Client(api_key=environ["FINHUB_TOKEN"])
 
     def download(self) -> list[Rating]:
@@ -107,25 +101,11 @@ class FinhubRating(Downloader[list[Rating]]):
         return [self.finhub_transform(dt) for dt in lst]
 
     def finhub_transform(self, entry: dict) -> Rating:
-        date_str = entry[FinhubEnum.PUBLISHED]
-        _date = (
-            datetime.strptime(date_str, "%Y-%m-%d").date()
-            if date_str is not None
-            else date.today()
+        return Rating(
+            date=_parse_date(entry[FinhubEnum.PUBLISHED]),
+            buy=entry.get(FinhubEnum.BUY, 0)
+            + 1.25 * entry.get(FinhubEnum.STRONG_BUY, 0),
+            hold=entry[FinhubEnum.HOLD],
+            sell=entry.get(FinhubEnum.SELL, 0)
+            + 1.25 * entry.get(FinhubEnum.STRONG_SELL, 0),
         )
-        buy = sell = 0
-        for name, value in entry.items():
-            match name:
-                case FinhubEnum.STRONG_BUY:
-                    buy += value * 1.25
-                case FinhubEnum.STRONG_SELL:
-                    sell += value * 1.25
-                case FinhubEnum.BUY:
-                    buy += value
-                case FinhubEnum.SELL:
-                    sell += value
-                case FinhubEnum.HOLD:
-                    hold = value
-                case _:
-                    pass
-        return Rating(_date, buy, hold, sell)

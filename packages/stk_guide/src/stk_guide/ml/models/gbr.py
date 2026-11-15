@@ -1,4 +1,3 @@
-from attrs import define, field
 from foundation.datatypes import DataType
 from pandas import DataFrame, Series
 from sklearn.ensemble import GradientBoostingRegressor
@@ -6,9 +5,8 @@ from sklearn.ensemble import GradientBoostingRegressor
 from .model import Model
 
 
-@define
 class GbrModel(Model):
-    _apimodel: GradientBoostingRegressor = field(init=False)
+    _apimodel: GradientBoostingRegressor
 
     def train(self, features: DataFrame, labels: Series) -> None:
         self._features_types = DataType.get_type(features)

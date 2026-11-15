@@ -1,8 +1,8 @@
 from datetime import date as Date
 from enum import StrEnum, auto
 
-from attrs import define
 from pandas import DataFrame
+from pydantic import BaseModel
 
 
 class RatingEnum(StrEnum):
@@ -11,17 +11,11 @@ class RatingEnum(StrEnum):
     SELL = auto()
 
 
-@define
-class Rating:
+class Rating(BaseModel):
     date: Date
-    buy: int
-    hold: int
-    sell: int
+    buy: float
+    hold: float
+    sell: float
 
     def to_frame(self, index: list[str | int] | None = None) -> DataFrame:
-        if index is None:
-            index = [0]
-        cols = ["date", "buy", "hold", "sell"]
-        return DataFrame(
-            [[self.date, self.buy, self.hold, self.sell]], columns=cols, index=index
-        )
+        return DataFrame([self.model_dump()], index=index or [0])

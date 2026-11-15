@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Any, Self
 
-from attrs import define, field
 from pandas import DataFrame, Series, concat
 
 from ..cloning import ResetClone
@@ -14,22 +13,21 @@ from .algorithms import (
 )
 
 
-@define
 class Encoder:
-    feature_encoders: dict[Any, CoderType] = field(factory=dict)
-    feature_scalers: dict[Any, CoderType] | CoderType = field(factory=dict)
-    _default_encoders: dict[type[CoderType], type | tuple[type, ...]] = field(
-        init=False
-    )
-    _fitted: bool = field(default=False, init=False)
-
-    def __attrs_post_init__(self) -> None:
-        self._default_encoders = {
+    def __init__(
+        self,
+        feature_encoders: dict[Any, CoderType] | None = None,
+        feature_scalers: dict[Any, CoderType] | CoderType | None = None,
+    ) -> None:
+        self.feature_encoders = feature_encoders or {}
+        self.feature_scalers = feature_scalers or {}
+        self._default_encoders: dict[type[CoderType], type | tuple[type, ...]] = {
             DatetimeCoder: datetime,
             OneHotCoder: str,
             IdentityCoder: (float, int),
             OrdinalCoder: bool,
         }
+        self._fitted = False
 
     def __call__(self, data: DataFrame) -> DataFrame:
         scalers = self.feature_scalers

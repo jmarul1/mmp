@@ -1,25 +1,19 @@
 from typing import Any, Self
 
-from attrs import define, field
-
 from ..logger import Logger, LoggerObject
 from .context import Context
 from .stages.stage import Stage
 
 
-@define
 class Pipeline(list):
-    context: Context = field(factory=Context)
-    _current_idx: int = field(init=False, default=0)
-    _logger: LoggerObject = field(init=False)
-
-    def __attrs_post_init__(self) -> None:
-        self._logger = Logger()(__name__)
+    def __init__(self, context: Context | None = None) -> None:
+        super().__init__()
+        self.context = context if context is not None else Context()
+        self._logger: LoggerObject = Logger()(__name__)
 
     def execute(self) -> None:
         for idx, (stage, kwargs) in enumerate(self, start=1):
-            self._current_idx = idx
-            self._logger.debug(f"Running {stage} {self._current_idx}/{len(self)}")
+            self._logger.debug(f"Running {stage} {idx}/{len(self)}")
             stage(context=self.context, **kwargs)
 
     def add(self, stage: Stage, **kwargs: Any) -> None:
@@ -46,7 +40,6 @@ class Pipeline(list):
         super().__setitem__(index, stage)
 
     def __iadd__(self, stage: Stage) -> Self:
-        self._validate(stage)
         self.append(stage)
         return self
 
@@ -55,26 +48,3 @@ class Pipeline(list):
         for stage in iterable:
             new_pipeline += stage
         return new_pipeline
-
-    def _show_flow(self) -> str:
-        def create_line(stages: list[str], n1: int, n2: int, reverse: bool) -> str:
-            beg, end = ("|- ", "") if reverse else ("", " -|")
-            lst, joiner = (
-                (stages[n1:n2][::-1], " <- ") if reverse else (stages[n1:n2], " -> ")
-            )
-            return beg + joiner.join(f"{stage}" for stage in lst) + end
-
-        stages = [f"{stage}" for stage in self]
-        stages[self._current_idx - 1] = (
-            f"\033[92m{stages[self._current_idx - 1]}\033[00m"
-        )
-        npl = 8
-        count1, count2 = int(len(self) / npl), len(self) % npl
-        lines = []
-        for idx in range(count1):
-            lines.append(create_line(stages, npl * idx, npl * (idx + 1), idx % 2 != 0))
-        if count2 > 0:
-            lines.append(
-                create_line(stages, npl * (idx + 1), len(self), (idx + 1) % 2 != 0)
-            )
-        print("\n".join(lines))

@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from attrs import define, field
 from foundation.encoding.algorithms import MinMaxCoder
 from foundation.encoding.encoder import Encoder
 from foundation.entities.rating import RatingEnum
@@ -13,9 +12,9 @@ class Scorer(ABC):
         pass
 
 
-@define
 class RatingsScorer(Scorer):
-    hold_weight: float = field(default=0.5)
+    def __init__(self, hold_weight: float = 0.5) -> None:
+        self.hold_weight = hold_weight
 
     def __call__(self, data: DataFrame) -> Series:
         _data = data.loc[:, [RatingEnum.BUY, RatingEnum.SELL, RatingEnum.HOLD]]

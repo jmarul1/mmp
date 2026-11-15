@@ -1,7 +1,5 @@
 from typing import Any
 
-from attrs import define, field
-
 from ..download.downloader import (
     FinhubRating,
     PriceHistory,
@@ -14,18 +12,13 @@ from .prices import Prices
 from .rating import Rating
 
 
-@define
 class Stock:
-    symbol: str
-    company: str = field(default=None)
-    prices: Prices = field(default=None, init=False)
-    options: Options = field(default=None, init=False)
-    info: dict[str, Any] = field(default=None, init=False)
-
-    def __attrs_post_init__(self) -> None:
-        if self.company is None:
-            self.company = self.symbol
-        self.info = StockInfo(self.symbol).download()
+    def __init__(self, symbol: str, company: str | None = None) -> None:
+        self.symbol = symbol
+        self.company = company or symbol
+        self.prices: Prices | None = None
+        self.options: Options | None = None
+        self.info: dict[str, Any] = StockInfo(symbol).download()
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, self.__class__):

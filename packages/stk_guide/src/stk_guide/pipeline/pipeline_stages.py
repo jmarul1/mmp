@@ -1,4 +1,4 @@
-from attrs import define, field
+from dataclasses import dataclass
 
 from ..pipeline.stages.collecting import Collector
 from ..pipeline.stages.predicting import Predictor
@@ -6,9 +6,9 @@ from ..pipeline.stages.preprocessing import Preprocessor
 from ..pipeline.stages.training import Trainer
 
 
-@define
+@dataclass(kw_only=True)
 class PipelineStages:
-    collector: Collector = field(default=None, kw_only=True)
-    preprocessor: Preprocessor = field(default=None, kw_only=True)
-    trainer: Trainer = field(default=None, kw_only=True)
-    predictor: Predictor = field(default=None, kw_only=True)
+    collector: Collector | None = None
+    preprocessor: Preprocessor | None = None
+    trainer: Trainer | None = None
+    predictor: Predictor | None = None

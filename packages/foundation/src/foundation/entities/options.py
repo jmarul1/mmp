@@ -1,8 +1,8 @@
+from dataclasses import dataclass
 from enum import StrEnum, auto
 from numbers import Number
 from typing import Any
 
-from attrs import define, field
 from numpy import mean
 from pandas import DataFrame
 
@@ -24,23 +24,22 @@ class OptionsEnum(StrEnum):
     SCORES = auto()
 
 
-@define
+@dataclass
 class Options:
-    calls: DataFrame = field(default=None)
-    puts: DataFrame = field(default=None)
+    calls: DataFrame
+    puts: DataFrame
 
     def sumarize_calls(self, weights: int | dict[str, int] = 1) -> DataFrame:
-        keys_weights = self._keys_weights(weights)
-        return DataFrame(
-            self.summarize_data(calls, keys_weights)
-            for _, calls in self.calls.groupby(OptionsEnum.EXPIRATION.value)
-        )
+        return self._summarize(self.calls, weights)
 
     def sumarize_puts(self, weights: int | dict[str, int] = 1) -> DataFrame:
+        return self._summarize(self.puts, weights)
+
+    def _summarize(self, chain: DataFrame, weights: int | dict[str, int]) -> DataFrame:
         keys_weights = self._keys_weights(weights)
         return DataFrame(
-            self.summarize_data(puts, keys_weights)
-            for _, puts in self.puts.groupby(OptionsEnum.EXPIRATION.value)
+            self.summarize_data(group, keys_weights)
+            for _, group in chain.groupby(OptionsEnum.EXPIRATION.value)
         )
 
     @staticmethod
@@ -63,29 +62,18 @@ class Options:
                 _data[name] = mean(values)
             else:
                 _data[name] = values.iloc[0]
+        projected = (
+            _options_data[OptionsEnum.STRIKE.value]
+            + _options_data[OptionsEnum.ASK.value]
+        )
+        total = scores.sum()
         _data[OptionsEnum.PROJECTED_PRICE_v0.value] = (
-            (
-                (
-                    options_data[OptionsEnum.STRIKE.value]
-                    + _options_data[OptionsEnum.ASK.value]
-                )
-                * scores
-            ).sum()
-            / scores.sum()
-            if scores.sum() > 0
-            else 0
+            (projected * scores).sum() / total if total > 0 else 0
         )
-        strikes_scored = DataFrame(
-            {
-                OptionsEnum.PROJECTED_PRICE_v1: _options_data[OptionsEnum.STRIKE.value]
-                + _options_data[OptionsEnum.ASK.value],
-                OptionsEnum.SCORES: scores,
-            }
+        ranked = DataFrame({"projected": projected, "scores": scores}).sort_values(
+            "scores", ascending=False
         )
-        ranked_strikes = strikes_scored.sort_values(OptionsEnum.SCORES, ascending=False)
-        _data[OptionsEnum.PROJECTED_PRICE_v1.value] = ranked_strikes[
-            OptionsEnum.PROJECTED_PRICE_v1
-        ].iloc[0]
+        _data[OptionsEnum.PROJECTED_PRICE_v1.value] = ranked["projected"].iloc[0]
         return _data
 
     def _keys_weights(self, weights: int | dict[str, int]) -> dict[str, int]:

@@ -1,6 +1,5 @@
 from typing import Any
 
-from attrs import define, field
 from click import MissingParameter
 from foundation.entities.prediction import Prediction
 from pandas import DataFrame
@@ -10,9 +9,8 @@ from ..decorators import PrePostExecution
 from .stage import Stage
 
 
-@define
 class Predictor(Stage):
-    _future_space: DataFrame = field(init=False)
+    _future_space: DataFrame
 
     @PrePostExecution.stage
     def __call__(self, context: Context, **kwargs: Any) -> None:

@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from attrs import define, field
 from dateutil.tz import gettz
 from foundation.download.download_enum import TimeZone
 from foundation.encoding.algorithms import MinMaxCoder
@@ -16,10 +15,11 @@ from ..pipeline.stages.collecting import PriceCollector
 from .strategy import Strategy
 
 
-@define
 class HistoricPrice(Strategy):
-    pipeline_stages: PipelineStages
-    pipeline: Pipeline = field(init=False)
+    pipeline: Pipeline
+
+    def __init__(self, pipeline_stages: PipelineStages) -> None:
+        self.pipeline_stages = pipeline_stages
 
     def __call__(
         self, stock: Stock, days_back: int, days_fwd: int, interval: str | None = None
