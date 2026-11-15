@@ -1,26 +1,36 @@
-# Build and Release Folders
-stk_guide/dist/*
-
-# Other files and folders
-.settings
-.vscode
+# Python
 __pycache__
-.venv
-.env
+*.py[cod]
+*$py.class
 *.egg-info
+.venv
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.ipynb_checkpoints
+
+# Environment and secrets
+.env
+
+# Build and release folders
+packages/stk_guide/dist/*
+
+# Local and scratch folders
+work
 testing_sandbox
-tools/*
+archive
+
+# IDE and editor files
+.vscode
+.settings
 *workspace
 
-# Executables
+# Executables and app packages
 *.swf
 *.air
 *.ipa
 *.apk
 
-# MAC OS generated files
+# macOS generated files
 .DS_Store
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
