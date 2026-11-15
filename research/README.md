@@ -1,10 +1,10 @@
 # research
 
-Notebooks and scripts for running and exploring the packages, and for collecting data.
+Notebooks for running and exploring the packages.
 
-- `notebooks/` interactive work (`uv sync --all-packages`, then pick the `.venv` kernel)
-- `scripts/`   repeatable runs
-- `../data/`   collected output; gitignored except `.gitkeep` and the sample CSV
+- `notebooks/watchlist.ipynb` price projection from options and recommendation scores from analyst ratings (`uv sync --all-packages`, then pick the `.venv` kernel)
+- `notebooks/watchlist.py` the `Watchlist` and `Charts` classes the notebook imports
+- `../data/`   collected output; gitignored except `.gitkeep`
 
 Plotting and Jupyter dependencies live in the root `research` dependency group,
 so the packages under `packages/` stay free of them.

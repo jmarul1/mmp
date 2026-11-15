@@ -1,18 +1,18 @@
 from abc import abstractmethod
 from typing import Any, Self
 
-from attrs import define, field
 from foundation.cloning import ResetClone
-from foundation.datatypes import DataType, NativeDataType, NativeKind
+from foundation.datatypes import DataType, NativeKind
 from foundation.encoding.encoder import Encoder
 from pandas import DataFrame, Series
 
 
-@define
 class Model:
-    preprocessor: Encoder = field(factory=Encoder, kw_only=True)
-    _features_types: list[NativeKind] = field(init=False)
-    _apimodel: Any = field(init=False)
+    _features_types: list[NativeKind]
+    _apimodel: Any
+
+    def __init__(self, *, preprocessor: Encoder | None = None) -> None:
+        self.preprocessor = preprocessor or Encoder()
 
     def predict(self, features: DataFrame) -> Series:
         if not self._check_features_types(features):
@@ -26,21 +26,13 @@ class Model:
     def clone_reset(self) -> Self:
         return ResetClone().clone_reset(self)
 
-    def data_type(self, test: NativeDataType) -> NativeKind:
-        return DataType.get_type(test)
-
     def __str__(self) -> str:
         return str(self.__class__)
 
     def _check_features_types(self, features: DataFrame) -> bool:
         if len(self._features_types) != features.shape[1]:
             return False
-        for orig, test in zip(
-            self._features_types, DataType.get_type(features), strict=False
-        ):
-            if orig != test:
-                return False
-        return True
+        return self._features_types == DataType.get_type(features)
 
     @abstractmethod
     def train(self, features: DataFrame, labels: Series) -> None:

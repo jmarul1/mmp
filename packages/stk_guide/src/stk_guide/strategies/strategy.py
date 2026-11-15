@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from foundation.entities.stocks import Stocks
+from foundation.market.stocks import Stocks
 from pandas import DataFrame
 
 

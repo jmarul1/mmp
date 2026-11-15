@@ -1,6 +1,5 @@
 from typing import Any, Self
 
-from attrs import define, field
 from numpy import array
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
@@ -10,10 +9,11 @@ from ..datatypes import ColumnData
 EncoderApi = MinMaxScaler | OneHotEncoder | OrdinalEncoder
 
 
-@define
 class CoderType:
-    options: dict[str, Any] = field(factory=dict)
-    api: EncoderApi = field(init=False)
+    api: EncoderApi
+
+    def __init__(self, options: dict[str, Any] | None = None) -> None:
+        self.options = options or {}
 
     def fit(self, data: ColumnData) -> Self:
         _data = array(data).reshape(-1, 1)
@@ -33,19 +33,18 @@ class CoderType:
         return ResetClone().clone_reset(self)
 
 
-@define
 class OrdinalCoder(CoderType):
-    def __attrs_post_init__(self) -> None:
+    def __init__(self, options: dict[str, Any] | None = None) -> None:
+        super().__init__(options)
         self.api = OrdinalEncoder(**self.options)
 
 
-@define
 class MinMaxCoder(CoderType):
-    def __attrs_post_init__(self) -> None:
+    def __init__(self, options: dict[str, Any] | None = None) -> None:
+        super().__init__(options)
         self.api = MinMaxScaler(**self.options)
 
 
-@define
 class IdentityCoder(CoderType):
     def fit(self, data: ColumnData) -> Self:
         return self
@@ -54,7 +53,6 @@ class IdentityCoder(CoderType):
         return data
 
 
-@define
 class DatetimeCoder(CoderType):
     def fit(self, data: ColumnData) -> Self:
         return self
@@ -63,9 +61,9 @@ class DatetimeCoder(CoderType):
         return [idata.timestamp() for idata in data]
 
 
-@define
 class OneHotCoder(CoderType):
-    def __attrs_post_init__(self) -> None:
+    def __init__(self, options: dict[str, Any] | None = None) -> None:
+        super().__init__(options)
         self.api = OneHotEncoder(**self.options)
 
     def code(self, data: ColumnData) -> ColumnData:

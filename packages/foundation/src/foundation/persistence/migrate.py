@@ -1,17 +1,17 @@
 from pathlib import Path
+from typing import ClassVar
 
 from alembic import command
 from alembic.config import Config
 
-MIGRATIONS = Path(__file__).parent / "migrations"
 
+class Migrator:
+    SCRIPTS: ClassVar[Path] = Path(__file__).parent / "migrations"
+    HEAD: ClassVar[str] = "head"
 
-def alembic_config(url: str) -> Config:
-    config = Config()
-    config.set_main_option("script_location", str(MIGRATIONS))
-    config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
-    return config
-
-
-def migrate(url: str, revision: str = "head") -> None:
-    command.upgrade(alembic_config(url), revision)
+    @classmethod
+    def upgrade(cls, url: str, revision: str = HEAD) -> None:
+        config = Config()
+        config.set_main_option("script_location", str(cls.SCRIPTS))
+        config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
+        command.upgrade(config, revision)

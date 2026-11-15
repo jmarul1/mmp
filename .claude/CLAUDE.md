@@ -1,6 +1,6 @@
 # mmp
 
-uv workspace (Python 3.15): `packages/foundation` (shared data flow), `packages/stk_guide`, `packages/llm_service`; `research/` for notebooks and scripts; `data/` and `work/` are gitignored.
+uv workspace (Python 3.15): `packages/foundation` (shared data flow and SQLite persistence), `packages/stk_guide` (models and pipeline pieces used by notebooks); `research/` for notebooks; `data/` and `work/` are gitignored.
 
 ## Current phase: refactor only
 - Keep new code to a minimum. Moves, renames, typing and lint fixes are in scope; new features and behavior changes are not.

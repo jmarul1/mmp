@@ -1,47 +1,31 @@
 from datetime import datetime
 from enum import StrEnum, auto
-from numbers import Number
 
 from pandas import DataFrame
-
-PriceEntry = dict[str, float]
+from pydantic import BaseModel
 
 
 class PricesEnum(StrEnum):
     DATETIME = auto()
 
 
-class Prices(dict):
-    def __init__(self, iterable: dict[datetime, PriceEntry] | None = None) -> None:
-        if iterable is None:
-            iterable = {}
-        self._validate(iterable)
-        super().__init__(iterable)
+class PriceBar(BaseModel):
+    ts: datetime
+    open: float | None = None
+    high: float | None = None
+    low: float | None = None
+    close: float | None = None
+    volume: float | None = None
+    dividends: float | None = None
+    stock_splits: float | None = None
 
-    def _validate(self, iterable: dict[datetime, PriceEntry]) -> None:
-        for key, val in iterable.items():
-            if not isinstance(key, datetime):
-                raise ValueError("Keys must be datetime objects")
-            if not isinstance(val, dict):
-                raise ValueError("Price must be a dict")
-            for pkey, pval in val.items():
-                if not isinstance(pkey, str):
-                    raise ValueError("Price Key must be a str")
-                if not isinstance(pval, Number):
-                    raise ValueError("Price value must be a number")
 
-    def __setitem__(self, key: datetime, value: PriceEntry) -> None:
-        self._validate({key: value})
-        return super().__setitem__(key, value)
+class Prices(BaseModel):
+    bars: list[PriceBar] = []
 
     def to_frame(self) -> DataFrame:
-        return DataFrame(self).transpose()
+        rows = [bar.model_dump() for bar in self.bars]
+        return DataFrame(rows, columns=list(PriceBar.model_fields)).set_index("ts")
 
     def features(self) -> DataFrame:
-        return (
-            self.to_frame()
-            .reset_index()
-            .rename({"index": PricesEnum.DATETIME.value}, axis=1)[
-                [PricesEnum.DATETIME.value]
-            ]
-        )
+        return DataFrame({PricesEnum.DATETIME.value: [bar.ts for bar in self.bars]})

@@ -1,13 +1,15 @@
 from alembic import context
 from foundation.persistence.models import Base
-from foundation.persistence.store import default_db_path
+from foundation.persistence.store import Store
 from sqlalchemy import create_engine
 
 config = context.config
 
 
 def database_url() -> str:
-    return config.get_main_option("sqlalchemy.url") or f"sqlite:///{default_db_path()}"
+    return (
+        config.get_main_option("sqlalchemy.url") or f"sqlite:///{Store.default_path()}"
+    )
 
 
 def run_migrations() -> None:
