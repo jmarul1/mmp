@@ -24,6 +24,5 @@ class PriceCollector(Collector):
     def _init(self, **kwargs: Any) -> None:
         if "days_back" not in kwargs:
             raise MissingParameter("days_back")
-        if "interval" in kwargs:
-            self._interval = kwargs["interval"]
+        self._interval = kwargs.get("interval", "1d")
         self._days_back = kwargs["days_back"]

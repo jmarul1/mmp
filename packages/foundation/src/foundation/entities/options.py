@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import StrEnum, auto
 from numbers import Number
 from typing import Any
@@ -24,10 +23,10 @@ class OptionsEnum(StrEnum):
     SCORES = auto()
 
 
-@dataclass
 class Options:
-    calls: DataFrame
-    puts: DataFrame
+    def __init__(self, calls: DataFrame, puts: DataFrame) -> None:
+        self.calls = calls
+        self.puts = puts
 
     def sumarize_calls(self, weights: int | dict[str, int] = 1) -> DataFrame:
         return self._summarize(self.calls, weights)

@@ -33,9 +33,7 @@ class Stock:
     def finhub_ratings(self) -> list[Rating]:
         return FinhubRating(self.symbol).download()
 
-    def populate_prices(
-        self, days_back: int | float = 5, interval: str | None = None
-    ) -> None:
+    def populate_prices(self, days_back: int | float = 5, interval: str = "1d") -> None:
         self.prices = PriceHistory(self.symbol, days_back, interval).download()
 
     def populate_options(self, max_number: int | None = None) -> None:

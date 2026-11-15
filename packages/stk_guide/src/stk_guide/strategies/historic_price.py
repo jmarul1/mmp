@@ -22,7 +22,7 @@ class HistoricPrice(Strategy):
         self.pipeline_stages = pipeline_stages
 
     def __call__(
-        self, stock: Stock, days_back: int, days_fwd: int, interval: str | None = None
+        self, stock: Stock, days_back: int, days_fwd: int, interval: str = "1d"
     ) -> Prediction:
         stock.populate_prices(days_back=days_back, interval=interval)
         history = stock.prices.features()

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from os import environ
 from typing import Any
@@ -22,25 +21,27 @@ def _parse_date(value: str | None) -> date:
     return datetime.strptime(value.split("T")[0], "%Y-%m-%d").date()
 
 
-@dataclass
 class Downloader[T](ABC):
-    symbol: str
+    def __init__(self, symbol: str) -> None:
+        self.symbol = symbol
 
     @abstractmethod
     def download(self) -> T:
         raise NotImplementedError
 
 
-@dataclass
 class StockInfo(Downloader[dict[str, Any]]):
     def download(self) -> dict[str, Any]:
         return Ticker(self.symbol).info
 
 
-@dataclass
 class PriceHistory(Downloader[Prices]):
-    days_back: int | float
-    interval: str = "1d"
+    def __init__(
+        self, symbol: str, days_back: int | float, interval: str = "1d"
+    ) -> None:
+        super().__init__(symbol)
+        self.days_back = days_back
+        self.interval = interval
 
     def download(self) -> Prices:
         tz = gettz(TimeZone.DEFAULT.value)
@@ -50,13 +51,10 @@ class PriceHistory(Downloader[Prices]):
         return Prices(df.to_dict("index"))
 
 
-@dataclass
 class StockOptions(Downloader[Options]):
-    max_number: int | None = None
-
-    def __post_init__(self) -> None:
-        if self.max_number is None:
-            self.max_number = -1
+    def __init__(self, symbol: str, max_number: int | None = None) -> None:
+        super().__init__(symbol)
+        self.max_number = -1 if max_number is None else max_number
 
     def download(self) -> Options:
         tic = Ticker(self.symbol)
@@ -73,7 +71,6 @@ class StockOptions(Downloader[Options]):
         return Options(concat(calls), concat(puts))
 
 
-@dataclass
 class RobinhoodRatings(Downloader[list[Rating]]):
     def download(self) -> list[Rating]:
         dt = get_ratings(self.symbol)
@@ -89,11 +86,9 @@ class RobinhoodRatings(Downloader[list[Rating]]):
         )
 
 
-@dataclass
 class FinhubRating(Downloader[list[Rating]]):
-    _client: Client = field(init=False)
-
-    def __post_init__(self) -> None:
+    def __init__(self, symbol: str) -> None:
+        super().__init__(symbol)
         self._client = Client(api_key=environ["FINHUB_TOKEN"])
 
     def download(self) -> list[Rating]:
