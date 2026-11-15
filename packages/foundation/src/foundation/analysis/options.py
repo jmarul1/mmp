@@ -19,6 +19,7 @@ class OptionsAnalyzer:
         OptionsEnum.PERCENTCHANGE.value,
     ]
     DEFAULT_WEIGHT: ClassVar[int] = 1
+    MIN_CONTRACTS: ClassVar[int] = 2
 
     @classmethod
     def summarize(
@@ -30,7 +31,8 @@ class OptionsAnalyzer:
         keys_weights = {key: weights.get(key, cls.DEFAULT_WEIGHT) for key in cls.SCORED}
         return DataFrame(
             cls.summarize_expiration(group, keys_weights)
-            for _, group in chain.groupby(OptionsEnum.EXPIRATION.value)
+            for _, group in chain.dropna().groupby(OptionsEnum.EXPIRATION.value)
+            if len(group) >= cls.MIN_CONTRACTS
         )
 
     @staticmethod
@@ -38,7 +40,7 @@ class OptionsAnalyzer:
         chain: DataFrame, keys_weights: dict[str, int]
     ) -> dict[Any, Any]:
         """Average one expiration's contracts and project two prices from strike plus ask: v0 is the score-weighted mean, v1 the top-scored contract, where scores are min-max scaled liquidity, inverted volatility and price change."""
-        data = chain.dropna().reset_index(drop=True)
+        data = chain.reset_index(drop=True)
         keys, weights = list(keys_weights), list(keys_weights.values())
         iscores = Encoder(
             feature_scalers={k: MinMaxCoder() for k in keys}

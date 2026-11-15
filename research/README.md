@@ -2,7 +2,8 @@
 
 Notebooks for running and exploring the packages.
 
-- `notebooks/` interactive work (`uv sync --all-packages`, then pick the `.venv` kernel)
+- `notebooks/watchlist.ipynb` price projection from options and recommendation scores from analyst ratings (`uv sync --all-packages`, then pick the `.venv` kernel)
+- `notebooks/watchlist.py` the `Watchlist` and `Charts` classes the notebook imports
 - `../data/`   collected output; gitignored except `.gitkeep`
 
 Plotting and Jupyter dependencies live in the root `research` dependency group,
